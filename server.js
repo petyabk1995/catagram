@@ -1,11 +1,14 @@
 const express = require('express');
+const handlebars = require('express-handlebars');
 const checkCatId = require('./middlewares/middleware');
 const logger = require('./middlewares/loggerMiddleware');
 const app = express();
 
 app.use('/static', express.static('public'));
-
 app.use(logger);
+
+app.engine('handlebars', handlebars());
+app.set('view engine', 'handlebars');
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/home.html');
