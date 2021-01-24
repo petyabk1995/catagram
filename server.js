@@ -1,31 +1,44 @@
 const express = require('express');
 const handlebars = require('express-handlebars');
 const checkCatId = require('./middlewares/middleware');
+const bodyParser = require('body-parser');
 const logger = require('./middlewares/loggerMiddleware');
+const cats = require('./cats.js');
 const app = express();
 
 app.use('/static', express.static('public'));
 app.use(logger);
-
-app.engine('handlebars', handlebars());
-app.set('view engine', 'handlebars');
+app.engine('hbs', handlebars({
+    extname: 'hbs',
+}));
+app.set('view engine', 'hbs');
+app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/views/home.html');
+    let name = 'Petya';
+    res.render('home', { name });
 });
 
 app.get('/download', (req, res) => {
-    res.download('./views/home.html');
+    res.download(__dirname + './public/index.html');
+    // res.sendFile(__dirname + '/views/home.html');
+});
+
+app.get('/cats', (req, res) => {
+    res.render('cats', {cats: cats.getAll()});
 });
 
 app.post('/cats', (req, res) => {
-    console.log('creating cat');
-    res.status(201).send('Cat created');
+    let catName = req.body.cat;
+    cats.add(catName);
+    res.redirect('/cats');
 });
 
-app.get('/cats/:catName?', checkCatId, (req, res) => {
-    res.send(`You are looking at ${req.params.catName}`)
-});
+// app.get('/cats/:catName?', checkCatId, (req, res) => {
+//     res.send(`You are looking at ${req.params.catName}`)
+// });
+
+
 
 
 // app.get('/cats/:catName/', (req, res) => {
